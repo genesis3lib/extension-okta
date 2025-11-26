@@ -1,0 +1,36 @@
+"""
+Okta authentication settings for {{projectName}}.
+Import these settings into your environment-specific settings files.
+"""
+
+import os
+
+# Okta Configuration
+OKTA_ISSUER = os.environ.get('OKTA_ISSUER', '')
+OKTA_AUDIENCE = os.environ.get('OKTA_AUDIENCE', 'api://default')
+OKTA_ROLE_CLAIM_KEY = '{{{roleClaimKey}}}'
+
+# REST Framework Authentication Configuration for Okta
+REST_FRAMEWORK_OKTA = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'auth.authentication.OktaJSONWebTokenAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+}
+
+# Merge OKTA settings into REST_FRAMEWORK if enabled
+def apply_okta_settings(rest_framework_settings):
+    """
+    Call this in your settings to apply Okta authentication.
+
+    Usage in dev.py or prod.py:
+        from .base import REST_FRAMEWORK
+        from .okta import apply_okta_settings
+        REST_FRAMEWORK = apply_okta_settings(REST_FRAMEWORK)
+    """
+    updated = rest_framework_settings.copy()
+    updated['DEFAULT_AUTHENTICATION_CLASSES'] = REST_FRAMEWORK_OKTA['DEFAULT_AUTHENTICATION_CLASSES']
+    updated['DEFAULT_PERMISSION_CLASSES'] = REST_FRAMEWORK_OKTA['DEFAULT_PERMISSION_CLASSES']
+    return updated

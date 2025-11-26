@@ -1,0 +1,60 @@
+import { useOktaAuth } from '@okta/okta-react';
+
+/**
+ * Custom hook to access Okta authentication
+ *
+ * Usage:
+ * ```tsx
+ * const { user, isAuthenticated, isLoading, login, logout } = useAuth();
+ *
+ * if (isLoading) return <div>Loading...</div>;
+ *
+ * if (!isAuthenticated) {
+ *   return <button onClick={login}>Log In</button>;
+ * }
+ *
+ * return (
+ *   <div>
+ *     <p>Welcome {user?.name}</p>
+ *     <button onClick={logout}>Log Out</button>
+ *   </div>
+ * );
+ * ```
+ */
+export function useAuth() {
+  const { oktaAuth, authState } = useOktaAuth();
+
+  const login = async () => {
+    await oktaAuth.signInWithRedirect();
+  };
+
+  const logout = async () => {
+    await oktaAuth.signOut();
+  };
+
+  const getAccessToken = async () => {
+    if (!authState?.isAuthenticated) {
+      return null;
+    }
+    const accessToken = authState.accessToken?.accessToken;
+    return accessToken || null;
+  };
+
+  const getIdToken = async () => {
+    if (!authState?.isAuthenticated) {
+      return null;
+    }
+    const idToken = authState.idToken?.idToken;
+    return idToken || null;
+  };
+
+  return {
+    user: authState?.idToken?.claims,
+    isAuthenticated: authState?.isAuthenticated || false,
+    isLoading: !authState,
+    login,
+    logout,
+    getAccessToken,
+    getIdToken,
+  };
+}

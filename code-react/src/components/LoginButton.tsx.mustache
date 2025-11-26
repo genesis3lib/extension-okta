@@ -1,0 +1,23 @@
+import { useAuth } from '../hooks/useAuth';
+
+interface LoginButtonProps {
+  children?: React.ReactNode;
+  className?: string;
+}
+
+/**
+ * Login button component
+ * Redirects to Okta login page
+ */
+export function LoginButton({ children = 'Log In', className }: LoginButtonProps) {
+  const { login } = useAuth();
+
+  return (
+    <button
+      onClick={login}
+      className={className}
+    >
+      {children}
+    </button>
+  );
+}

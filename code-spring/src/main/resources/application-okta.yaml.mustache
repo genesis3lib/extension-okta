@@ -1,0 +1,20 @@
+app:
+  okta:
+    issuer: ${SPRING_ENV_OKTA_ISSUER:https://example.okta.com/oauth2/default}
+    client-id: ${SPRING_ENV_OKTA_CLIENT_ID:your-client-id}
+    audience: ${SPRING_ENV_OKTA_AUDIENCE:api://default}
+    role-claim-key: {{{roleClaimKey}}}
+    {{#tenantIdClaimKey}}
+    tenant-claim-key: {{{tenantIdClaimKey}}}
+    {{/tenantIdClaimKey}}
+  users:
+    root: ${SPRING_ENV_ROOT_USER:}
+    admins: ${SPRING_ENV_ADMIN_USERS:}
+
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${SPRING_ENV_OKTA_ISSUER:https://example.okta.com/oauth2/default}
+          jwk-set-uri: ${SPRING_ENV_OKTA_ISSUER:https://example.okta.com/oauth2/default}/v1/keys

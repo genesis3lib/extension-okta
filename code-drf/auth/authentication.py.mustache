@@ -1,0 +1,101 @@
+"""
+Okta JWT Authentication for Django REST Framework
+Project: {{projectName}}
+"""
+
+from okta_jwt_verifier import JWTVerifier
+from django.conf import settings
+from rest_framework import authentication, exceptions
+
+
+class OktaJSONWebTokenAuthentication(authentication.BaseAuthentication):
+    """
+    Okta JWT Authentication class for DRF.
+
+    Validates JWT tokens issued by Okta and extracts user information.
+    Uses okta-jwt-verifier library for official Okta validation.
+    """
+
+    def authenticate(self, request):
+        """
+        Authenticate the request and return a tuple of (user, token_payload).
+        """
+        auth_header = authentication.get_authorization_header(request)
+
+        if not auth_header:
+            return None
+
+        try:
+            auth_parts = auth_header.decode('utf-8').split()
+        except UnicodeDecodeError:
+            raise exceptions.AuthenticationFailed('Invalid token header encoding')
+
+        if len(auth_parts) != 2 or auth_parts[0].lower() != 'bearer':
+            return None
+
+        token = auth_parts[1]
+
+        try:
+            payload = self._verify_token(token)
+        except Exception as e:
+            raise exceptions.AuthenticationFailed(f'Token validation failed: {str(e)}')
+
+        # Create a simple user object from the token payload
+        user = OktaUser(payload)
+
+        return (user, payload)
+
+    def _verify_token(self, token):
+        """
+        Verify and decode the JWT token using Okta's JWT verifier.
+        """
+        # Get Okta settings
+        okta_issuer = getattr(settings, 'OKTA_ISSUER', None)
+        okta_audience = getattr(settings, 'OKTA_AUDIENCE', 'api://default')
+
+        if not okta_issuer:
+            raise exceptions.AuthenticationFailed('OKTA_ISSUER not configured')
+
+        # Create JWT verifier instance
+        jwt_verifier = JWTVerifier(
+            issuer=okta_issuer,
+            audience=okta_audience
+        )
+
+        # Verify the token
+        # This will raise an exception if verification fails
+        payload = jwt_verifier.verify_access_token(token)
+
+        return payload
+
+
+class OktaUser:
+    """
+    Simple user class that represents an Okta authenticated user.
+    """
+
+    def __init__(self, payload):
+        self.payload = payload
+        self.id = payload.get('sub')
+        self.email = payload.get('email') or payload.get('preferred_username')
+        self.is_authenticated = True
+        self.is_active = True
+
+        # Extract roles from custom claim
+        role_claim_key = getattr(settings, 'OKTA_ROLE_CLAIM_KEY', '{{roleClaimKey}}')
+        self.roles = payload.get(role_claim_key, [])
+
+    def __str__(self):
+        return self.email or self.id
+
+    @property
+    def is_anonymous(self):
+        return False
+
+    def has_role(self, role):
+        """Check if user has a specific role."""
+        return role in self.roles
+
+    def has_any_role(self, roles):
+        """Check if user has any of the specified roles."""
+        return any(role in self.roles for role in roles)

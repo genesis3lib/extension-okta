@@ -1,0 +1,128 @@
+{
+  "version": "3.0.0",
+  "metadata": {
+    "id": "extension-okta",
+    "name": "Okta Authentication",
+    "kind": "extension",
+    "type": "okta",
+    "description": "Add Okta OAuth2 authentication and authorization with RBAC support",
+    "tags": [
+      "authentication",
+      "security",
+      "oauth2",
+      "rbac",
+      "okta"
+    ],
+    "compatibleWith": [
+      "spring",
+      "react",
+      "drf"
+    ],
+    "dependsOn": [
+      "extension-rbac"
+    ],
+    "springProfiles": [
+      "okta"
+    ],
+    "affiliateUrl": "",
+    "providesFragments": {
+      "authentication-provider": {
+        "mode": "conflict",
+        "notes": "Provides Okta OAuth2 authentication across backend and frontend"
+      }
+    },
+    "onConflict": {
+      "message": "Choose only one authentication provider (Auth0, Okta, or Stytch)"
+    }
+  },
+  "scaffoldConfigTemplate": [
+    {
+      "key": "enableRbac",
+      "label": "Enable Role-Based Access Control (RBAC)",
+      "type": "boolean",
+      "default": true,
+      "required": true,
+      "description": "Enable RBAC integration with extension-rbac for role and permission management"
+    },
+    {
+      "key": "roleClaimKey",
+      "label": "Role Claim Key",
+      "type": "text",
+      "default": "groups",
+      "required": true,
+      "description": "The claim name in Okta ID token that contains user roles/groups",
+      "visibleIf": "enableRbac === true"
+    },
+    {
+      "key": "tenantIdClaimKey",
+      "label": "Tenant ID Claim Key",
+      "type": "text",
+      "default": "org_id",
+      "required": false,
+      "description": "The claim name for tenant/organization ID (for multi-tenant apps)",
+      "visibleIf": "enableRbac === true"
+    }
+  ],
+  "runtimeConfigTemplate": [
+    {
+      "key": "OKTA_ISSUER",
+      "description": "Okta issuer URL (e.g., https://your-domain.okta.com/oauth2/default)",
+      "required": true,
+      "secret": false,
+      "targets": [
+        "backend",
+        "frontend"
+      ],
+      "commonForAllEnv": true
+    },
+    {
+      "key": "OKTA_CLIENT_ID",
+      "description": "Okta application client ID",
+      "required": true,
+      "secret": false,
+      "targets": [
+        "backend",
+        "frontend"
+      ],
+      "commonForAllEnv": false
+    },
+    {
+      "key": "OKTA_CLIENT_SECRET",
+      "description": "Okta application client secret (backend only)",
+      "required": true,
+      "secret": true,
+      "targets": [
+        "backend"
+      ],
+      "commonForAllEnv": false
+    },
+    {
+      "key": "OKTA_AUDIENCE",
+      "description": "Okta API audience/identifier (defaults to api://default if not specified)",
+      "example": "api://default",
+      "default": "api://default",
+      "required": false,
+      "secret": false,
+      "targets": [
+        "backend",
+        "frontend"
+      ],
+      "commonForAllEnv": true
+    }
+  ],
+  "dependencies": {
+    "gradle": [
+      "implementation 'com.okta.spring:okta-spring-boot-starter:3.0.7'"
+    ],
+    "npm": {
+      "dependencies": {
+        "@okta/okta-react": "^6.9.0",
+        "@okta/okta-auth-js": "^7.8.0"
+      }
+    },
+    "pip": [
+      "okta-jwt-verifier==0.2.9",
+      "cryptography==42.0.0"
+    ]
+  }
+}

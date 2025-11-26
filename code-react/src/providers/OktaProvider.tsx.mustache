@@ -1,0 +1,54 @@
+{{=<% %>=}}import { Security } from '@okta/okta-react';
+import { OktaAuth, toRelativeUrl } from '@okta/okta-auth-js';
+import type { ReactNode } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+interface OktaProviderProps {
+  children: ReactNode;
+}
+
+/**
+ * Okta Authentication Provider
+ * Wraps the application with Okta authentication context
+ * Handles post-login redirect to originally requested URL
+ *
+ * Configuration via environment variables:
+ * - VITE_OKTA_ISSUER: Your Okta issuer URL (e.g., https://your-domain.okta.com/oauth2/default)
+ * - VITE_OKTA_CLIENT_ID: Your Okta application client ID
+ * - VITE_OKTA_AUDIENCE: Your API audience/identifier (defaults to api://default)
+ */
+export function OktaProvider({ children }: OktaProviderProps) {
+  const navigate = useNavigate();
+  const issuer = import.meta.env.VITE_OKTA_ISSUER;
+  const clientId = import.meta.env.VITE_OKTA_CLIENT_ID;
+  const audience = import.meta.env.VITE_OKTA_AUDIENCE || 'api://default';
+
+  if (!issuer || !clientId) {
+    console.error('Okta configuration missing. Please set VITE_OKTA_ISSUER and VITE_OKTA_CLIENT_ID');
+    return <>{children}</>;
+  }
+
+  // Create Okta Auth instance
+  const oktaAuth = new OktaAuth({
+    issuer,
+    clientId,
+    redirectUri: window.location.origin + '/login/callback',
+    scopes: ['openid', 'profile', 'email'],
+    pkce: true,
+    tokenManager: {
+      autoRenew: true,
+    },
+  });
+
+  const restoreOriginalUri = async (_oktaAuth: OktaAuth, originalUri: string) => {
+    // Redirect to originally requested URL or home page
+    navigate(toRelativeUrl(originalUri || '/', window.location.origin));
+  };
+
+  return (
+    <Security oktaAuth={oktaAuth} restoreOriginalUri={restoreOriginalUri}>
+      {children}
+    </Security>
+  );
+}
+<%={{ }}=%>
