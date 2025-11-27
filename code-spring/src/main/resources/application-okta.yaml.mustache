@@ -1,4 +1,6 @@
 app:
+  auth:
+    provider: okta
   okta:
     issuer: ${SPRING_ENV_OKTA_ISSUER:https://example.okta.com/oauth2/default}
     client-id: ${SPRING_ENV_OKTA_CLIENT_ID:your-client-id}
