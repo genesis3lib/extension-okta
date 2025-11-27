@@ -1,5 +1,6 @@
 {{=<% %>=}}import { useEffect, useState } from 'react';
 import { useApiClient } from '../utils/apiClient';
+import { ThemeSelector } from '../components/ThemeSelector';
 
 interface UserProfile {
   id: number;
@@ -171,6 +172,10 @@ export function Profile() {
             </tr>
           </tbody>
         </table>
+
+        <div style={{ marginTop: '30px', padding: '20px', border: '1px solid #ddd', borderRadius: '8px' }}>
+          <ThemeSelector />
+        </div>
       </div>
     </div>
   );
