@@ -4,6 +4,10 @@
     "id": "extension-okta",
     "name": "Okta Authentication",
     "kind": "extension",
+    "layers": [
+      "backend",
+      "frontend"
+    ],
     "type": "okta",
     "description": "Add Okta OAuth2 authentication and authorization with RBAC support",
     "tags": [
@@ -24,7 +28,6 @@
     "springProfiles": [
       "okta"
     ],
-    "affiliateUrl": "",
     "providesFragments": {
       "authentication-provider": {
         "mode": "conflict",
@@ -76,6 +79,7 @@
     {
       "key": "OKTA_CLIENT_ID",
       "description": "Okta application client ID",
+      "example": "0oaxxxxxxxxxxxxxxxx",
       "required": true,
       "secret": false,
       "targets": [
@@ -87,6 +91,7 @@
     {
       "key": "OKTA_CLIENT_SECRET",
       "description": "Okta application client secret (backend only)",
+      "example": "your-okta-client-secret",
       "required": true,
       "secret": true,
       "targets": [
