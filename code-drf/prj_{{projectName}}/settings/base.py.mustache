@@ -26,7 +26,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'auth.middleware.OktaUserSyncMiddleware',
+    # Note: User sync is done in OktaJSONWebTokenAuthentication class (not middleware)
 ]
 
 ROOT_URLCONF = 'prj_{{{projectName}}}.urls'
@@ -61,12 +61,19 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Okta Configuration
-OKTA_ISSUER = os.environ.get('OKTA_ISSUER', '{{{oktaIssuer}}}')
-OKTA_AUDIENCE = os.environ.get('OKTA_AUDIENCE', 'api://default')
+# Non-confidential values baked in at generation time (same as Spring)
+OKTA_ISSUER = '{{{oktaIssuer}}}'
+OKTA_JWKS_URI = '{{{oktaIssuer}}}/v1/keys'
 OKTA_ROLE_CLAIM_KEY = '{{{roleClaimKey}}}'
 {{#tenantIdClaimKey}}
 OKTA_TENANT_CLAIM_KEY = '{{{tenantIdClaimKey}}}'
 {{/tenantIdClaimKey}}
+{{^tenantIdClaimKey}}
+OKTA_TENANT_CLAIM_KEY = ''
+{{/tenantIdClaimKey}}
+
+# Audience varies per environment - read from env var with fallback
+OKTA_AUDIENCE = os.environ.get('PYTHON_DRF_OKTA_AUDIENCE', 'api://default')
 
 # REST Framework with Okta Authentication
 REST_FRAMEWORK = {
