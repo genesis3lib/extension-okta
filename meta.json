@@ -32,6 +32,9 @@
       "authentication-provider": {
         "mode": "conflict",
         "notes": "Provides Okta OAuth2 authentication across backend and frontend"
+      },
+      "django-settings": {
+        "mode": "append"
       }
     },
     "onConflict": {
